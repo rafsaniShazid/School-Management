@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  # Database service (PostgreSQL)
+  db:
+    image: postgres:15-alpine
+    container_name: school-db
+    environment:
+      POSTGRES_DB: school_management
+      POSTGRES_USER: school_admin
+      POSTGRES_PASSWORD: school_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - school-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U school_admin -d school_management"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Spring Boot application
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: school-app
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/school_management
+      SPRING_DATASOURCE_USERNAME: school_admin
+      SPRING_DATASOURCE_PASSWORD: school_password
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_JPA_SHOW_SQL: "false"
+    ports:
+      - "8081:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - school-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  school-network:
+    driver: bridge

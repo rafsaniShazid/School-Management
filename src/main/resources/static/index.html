@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>School Management System</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <h1>School Management System</h1>
+        <ul>
+            <li><a href="index.html" class="active">Home</a></li>
+            <li><a href="students.html">Students</a></li>
+            <li><a href="teachers.html">Teachers</a></li>
+            <li><a href="courses.html">Courses</a></li>
+            <li><a href="enrollments.html">Enrollments</a></li>
+            <li><a href="departments.html">Departments</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <h2>Welcome to School Management System</h2>
+        <div class="dashboard">
+            <div class="card">
+                <h3>Students</h3>
+                <p>Manage student records</p>
+                <a href="students.html" class="btn">Go to Students</a>
+            </div>
+            <div class="card" id="teachersCard">
+                <h3>Teachers</h3>
+                <p>Manage teacher information</p>
+                <a href="teachers.html" class="btn">Go to Teachers</a>
+            </div>
+            <div class="card">
+                <h3>Courses</h3>
+                <p>Manage course catalog</p>
+                <a href="courses.html" class="btn">Go to Courses</a>
+            </div>
+            <div class="card">
+                <h3>Enrollments</h3>
+                <p>Manage student enrollments</p>
+                <a href="enrollments.html" class="btn">Go to Enrollments</a>
+            </div>
+            <div class="card" id="departmentsCard">
+                <h3>Departments</h3>
+                <p>Manage departments</p>
+                <a href="departments.html" class="btn">Go to Departments</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Hide teacher and department links for students
+        async function checkAccess() {
+            try {
+                const teacherResponse = await fetch('/api/teachers');
+                if (teacherResponse.status === 403) {
+                    // Student role - hide teacher and department sections
+                    document.getElementById('teachersCard')?.remove();
+                    document.getElementById('departmentsCard')?.remove();
+                    document.getElementById('teachersLink')?.remove();
+                    document.getElementById('departmentsLink')?.remove();
+                }
+            } catch (e) {
+                console.log('Access check completed');
+            }
+        }
+        checkAccess();
+    </script>
+</body>
+</html>

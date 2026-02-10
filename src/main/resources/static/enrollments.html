@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enrollments - School Management</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <h1>School Management System</h1>
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="students.html">Students</a></li>
+            <li><a href="teachers.html" id="teachersLink">Teachers</a></li>
+            <li><a href="courses.html">Courses</a></li>
+            <li><a href="enrollments.html" class="active">Enrollments</a></li>
+            <li><a href="departments.html" id="departmentsLink">Departments</a></li>
+            <li style="margin-left: auto;"><a href="/logout">Logout</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <h2>Enrollment Management</h2>
+        
+        <div id="message"></div>
+
+        <div class="form-container">
+            <h3 id="formTitle">Add New Enrollment</h3>
+            <form id="enrollmentForm">
+                <input type="hidden" id="enrollmentId">
+                <div class="form-group">
+                    <label>Student:</label>
+                    <select id="studentId" required>
+                        <option value="">Select Student</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Course:</label>
+                    <select id="courseId" required>
+                        <option value="">Select Course</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Status:</label>
+                    <select id="status" required>
+                        <option value="ACTIVE">Active</option>
+                        <option value="COMPLETED">Completed</option>
+                        <option value="DROPPED">Dropped</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn">Save Enrollment</button>
+                <button type="button" class="btn" onclick="resetForm()">Cancel</button>
+            </form>
+        </div>
+
+        <h3>All Enrollments</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Student ID</th>
+                    <th>Course ID</th>
+                    <th>Enrollment Date</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="enrollmentList"></tbody>
+        </table>
+    </div>
+
+    <script>
+        const API_URL = '/api/enrollments';
+
+        async function loadEnrollments() {
+            const response = await fetch(API_URL);
+            const enrollments = await response.json();
+            const tbody = document.getElementById('enrollmentList');
+            tbody.innerHTML = enrollments.map(e => `
+                <tr>
+                    <td>${e.id}</td>
+                    <td>${e.studentId}</td>
+                    <td>${e.courseId}</td>
+                    <td>${e.enrollmentDate || '-'}</td>
+                    <td>${e.status}</td>
+                    <td class="actions">
+                        <button class="btn" onclick="editEnrollment(${e.id})">Edit</button>
+                        <button class="btn btn-danger" onclick="deleteEnrollment(${e.id})">Delete</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        async function loadStudents() {
+            const response = await fetch('/api/students');
+            const students = await response.json();
+            const select = document.getElementById('studentId');
+            select.innerHTML = '<option value="">Select Student</option>' + 
+                students.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+        }
+
+        async function loadCourses() {
+            const response = await fetch('/api/courses');
+            const courses = await response.json();
+            const select = document.getElementById('courseId');
+            select.innerHTML = '<option value="">Select Course</option>' + 
+                courses.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+        }
+
+        document.getElementById('enrollmentForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('enrollmentId').value;
+            const enrollment = {
+                studentId: parseInt(document.getElementById('studentId').value),
+                courseId: parseInt(document.getElementById('courseId').value),
+                status: document.getElementById('status').value
+            };
+
+            const method = id ? 'PUT' : 'POST';
+            const url = id ? `${API_URL}/${id}` : API_URL;
+
+            const response = await fetch(url, {
+                method: method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(enrollment)
+            });
+
+            if (response.ok) {
+                showMessage('Enrollment saved successfully!', 'success');
+                resetForm();
+                loadEnrollments();
+            } else {
+                showMessage('Error saving enrollment', 'error');
+            }
+        });
+
+        async function editEnrollment(id) {
+            const response = await fetch(`${API_URL}/${id}`);
+            const enrollment = await response.json();
+            document.getElementById('enrollmentId').value = enrollment.id;
+            document.getElementById('studentId').value = enrollment.studentId;
+            document.getElementById('courseId').value = enrollment.courseId;
+            document.getElementById('status').value = enrollment.status;
+            document.getElementById('formTitle').textContent = 'Edit Enrollment';
+        }
+
+        async function deleteEnrollment(id) {
+            if (confirm('Are you sure you want to delete this enrollment?')) {
+                const response = await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
+                if (response.ok) {
+                    showMessage('Enrollment deleted successfully!', 'success');
+                    loadEnrollments();
+                }
+            }
+        }
+
+        function resetForm() {
+            document.getElementById('enrollmentForm').reset();
+            document.getElementById('enrollmentId').value = '';
+            document.getElementById('formTitle').textContent = 'Add New Enrollment';
+        }
+
+        function showMessage(text, type) {
+            const msgDiv = document.getElementById('message');
+            msgDiv.innerHTML = `<div class="message ${type}">${text}</div>`;
+            setTimeout(() => msgDiv.innerHTML = '', 3000);
+        }
+
+        loadStudents();
+        loadCourses();
+        loadEnrollments();
+    </script>
+</body>
+</html>

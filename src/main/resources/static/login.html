@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - School Management</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .login-container {
+            max-width: 400px;
+            margin: 100px auto;
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .login-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .login-header h2 {
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+        
+        .login-info {
+            background: #e7f3ff;
+            padding: 1rem;
+            border-radius: 4px;
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+        }
+        
+        .login-info h4 {
+            margin-top: 0;
+            color: #007bff;
+        }
+        
+        .login-info p {
+            margin: 0.3rem 0;
+        }
+        
+        .alert {
+            padding: 0.75rem;
+            margin-bottom: 1rem;
+            border-radius: 4px;
+        }
+        
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .alert-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body style="background-color: #f4f4f4;">
+    <div class="login-container">
+        <div class="login-header">
+            <h2>🎓 School Management System</h2>
+            <p>Please login to continue</p>
+        </div>
+
+        <div class="login-info">
+            <h4>Demo Credentials:</h4>
+            <p><strong>Teacher:</strong> teacher / teacher123</p>
+            <p><strong>Student:</strong> student / student123</p>
+        </div>
+
+        <div id="message"></div>
+
+        <form method="post" action="/login">
+            <div class="form-group">
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username" required autofocus>
+            </div>
+            <div class="form-group">
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <button type="submit" class="btn" style="width: 100%;">Login</button>
+        </form>
+    </div>
+
+    <script>
+        // Show logout success message
+        const urlParams = new URLSearchParams(window.location.search);
+        const messageDiv = document.getElementById('message');
+        
+        if (urlParams.has('logout')) {
+            messageDiv.innerHTML = '<div class="alert alert-success">You have been logged out successfully.</div>';
+        }
+        
+        if (urlParams.has('error')) {
+            messageDiv.innerHTML = '<div class="alert alert-error">Invalid username or password.</div>';
+        }
+    </script>
+</body>
+</html>
